@@ -18,13 +18,13 @@ public class SignatureProofResult extends DisclosureProofResult {
     }
 
     public SignatureProofResult(ProofList proofs, String message,
-                                BigInteger nonce, BigInteger context, Timestamp timestamp) {
+                                BigInteger nonce, BigInteger context, Timestamp timestamp, String messageType) {
         setStatus(Status.VALID); // Note: we don't check the validity here!
-        this.signature = new IrmaSignedMessage(proofs, nonce, context, message, timestamp);
+        this.signature = new IrmaSignedMessage(proofs, nonce, context, message, messageType, timestamp);
     }
 
     public SignatureProofResult(ProofList proofs, SignatureProofRequest request) {
-        this(proofs, request.getMessage(), request.getSignatureNonce(), request.getContext(), request.getTimestamp());
+        this(proofs, request.getMessage(), request.getSignatureNonce(), request.getContext(), request.getTimestamp(), request.getMessageType());
     }
 
     @Override

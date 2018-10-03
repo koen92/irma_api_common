@@ -19,15 +19,17 @@ public class IrmaSignedMessage {
 	private BigInteger nonce;
 	private BigInteger context;
 	private String message;
+	private String messageType;
 	private Timestamp timestamp;
 
 	private transient Map<AttributeIdentifier, String> attributes;
 
-	public IrmaSignedMessage(ProofList proofs, BigInteger nonce, BigInteger context, String message, Timestamp timestamp) {
+	public IrmaSignedMessage(ProofList proofs, BigInteger nonce, BigInteger context, String message, String messageType, Timestamp timestamp) {
 		this.signature = proofs;
 		this.nonce = nonce;
 		this.context = context;
 		this.message = message;
+		this.messageType = messageType;
 		this.timestamp = timestamp;
 	}
 
@@ -59,7 +61,7 @@ public class IrmaSignedMessage {
 		// Verify with 'empty' request if request was not set
 		if (request == null) {
 			request = new SignatureProofRequest(nonce, context,
-					new AttributeDisjunctionList(), message);
+					new AttributeDisjunctionList(), message, messageType);
 			request.setTimestamp(getTimestamp());
 		}
 
@@ -71,6 +73,10 @@ public class IrmaSignedMessage {
 
 	public String getMessage() {
 		return message;
+	}
+
+	public String getMessageType() {
+		return messageType;
 	}
 
 	public ProofList getProofs() {

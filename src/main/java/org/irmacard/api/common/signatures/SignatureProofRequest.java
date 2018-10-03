@@ -1,10 +1,6 @@
 package org.irmacard.api.common.signatures;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.asn1.*;
 import org.irmacard.api.common.AttributeDisjunctionList;
 import org.irmacard.api.common.disclosure.DisclosureProofRequest;
 import org.irmacard.api.common.disclosure.DisclosureProofResult;
@@ -23,12 +19,14 @@ import java.util.Date;
 @SuppressWarnings("unused")
 public class SignatureProofRequest extends DisclosureProofRequest {
     private String message;
+    private String messageType;
     private transient Timestamp timestamp;
 
     public SignatureProofRequest(BigInteger nonce, BigInteger context,
-                                 AttributeDisjunctionList content, String message) {
+                                 AttributeDisjunctionList content, String message, String messageType) {
         super(nonce, context, content);
         this.message = message;
+        this.messageType = messageType;
     }
 
     public SignatureProofResult verify(ProofList proofs, boolean allowExpired) throws KeyException, InfoException {
@@ -65,6 +63,8 @@ public class SignatureProofRequest extends DisclosureProofRequest {
         return message;
     }
 
+    public String getMessageType() { return messageType; }
+
     public Timestamp getTimestamp() {
         return timestamp;
     }
@@ -84,8 +84,15 @@ public class SignatureProofRequest extends DisclosureProofRequest {
         ASN1EncodableVector vector = new ASN1EncodableVector();
         vector.add(new ASN1Integer(nonce));
         vector.add(new ASN1Integer(messageHash));
-        if (timestamp != null)
+        if (timestamp != null) {
             vector.add(new DEROctetString(timestamp.Sig.Data));
+        }
+        if (messageType != null && (messageType.equals("string") || messageType.equals("jpg"))) { // TODO: use enum instead for messageType?
+            // TODO: throw error if messageType is not valid/known?
+            byte[] messageTypeBytes = this.messageType.getBytes();
+            // TODO: is DEROctetString really the ASN1 type we want?
+            vector.add(new DEROctetString(messageTypeBytes));
+        }
 
         try {
             return Crypto.sha256Hash(new DERSequence(vector).getEncoded());
